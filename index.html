@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>뉴스 아카이브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --bg-card: #ffffff;
+    --bg-tag: #1a1a1a;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5a5a5a;
+    --text-muted: #9a9a9a;
+    --accent: #c8392b;
+    --accent-light: #fdf0ee;
+    --border: #e0ddd5;
+    --border-strong: #c8c4bb;
+    --global-accent: #1a3a5c;
+    --global-light: #eef3f8;
+    --domestic-accent: #2d5a3d;
+    --domestic-light: #eef5f1;
+    --tab-active-bg: #1a1a1a;
+    --tab-active-text: #ffffff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* 헤더 */
+  header {
+    background: var(--text-primary);
+    color: #fff;
+    padding: 1.5rem 2rem 1.2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .site-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .site-subtitle {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* 날짜 선택 */
+  .date-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .date-label {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  input[type="date"] {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.82rem;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    outline: none;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.6);
+  }
+
+  /* 검색창 */
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 280px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.4);
+    pointer-events: none;
+  }
+
+  input[type="search"] {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 0.4rem 0.7rem 0.4rem 2rem;
+    font-size: 0.82rem;
+    border-radius: 4px;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    transition: background 0.2s;
+  }
+
+  input[type="search"]::placeholder { color: rgba(255,255,255,0.35); }
+  input[type="search"]:focus { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); }
+
+  /* 탭 */
+  .tabs {
+    display: flex;
+    gap: 0.3rem;
+    margin-left: auto;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.55);
+    padding: 0.38rem 0.9rem;
+    font-size: 0.78rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .tab-btn.active { background: #fff; color: var(--text-primary); border-color: #fff; }
+
+  /* 메인 콘텐츠 */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* 섹션 뷰 */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* 날짜 헤더 */
+  .date-heading {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .date-heading-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .date-heading-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .count-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    background: var(--border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+  }
+
+  /* 뉴스 카드 */
+  .news-cards { display: flex; flex-direction: column; gap: 1rem; }
+
+  .news-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+
+  .news-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+  .card-header {
+    padding: 1rem 1.25rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.55rem;
+    flex-wrap: wrap;
+  }
+
+  .card-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    min-width: 1.4rem;
+  }
+
+  .card-tag {
+    background: var(--bg-tag);
+    color: #fff;
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .card-tag.global { background: var(--global-accent); }
+  .card-tag.domestic { background: var(--domestic-accent); }
+
+  .source-chips {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+
+  .source-chip {
+    font-size: 0.66rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.15rem 0.45rem;
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .card-headline-en {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.01em;
+  }
+
+  .card-headline-ko {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* 국내 카드 헤드라인 */
+  .card-headline-ko.main {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0;
+  }
+
+  /* 카드 바디 */
+  .card-body { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .field { display: flex; flex-direction: column; gap: 0.2rem; }
+
+  .field-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .field-value {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .field-value.fact {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.88rem;
+  }
+
+  .field-value.extra {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    background: var(--accent-light);
+    border-left: 2px solid var(--accent);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* 검색 결과 */
+  .search-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .search-result-group { margin-bottom: 2rem; }
+
+  .search-result-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .highlight {
+    background: #fff3cd;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  /* 링크 허브 */
+  .link-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .link-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.15s;
+    box-shadow: var(--shadow);
+  }
+
+  .link-card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+
+  .link-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .link-info { flex: 1; min-width: 0; }
+  .link-name { font-size: 0.88rem; font-weight: 700; margin-bottom: 0.15rem; }
+  .link-desc { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .link-arrow {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .hub-section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hub-section-title:first-child { margin-top: 0; }
+
+  /* 빈 상태 */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-secondary); }
+  .empty-state-desc { font-size: 0.82rem; line-height: 1.6; }
+
+  /* 모바일 */
+  @media (max-width: 640px) {
+    header { padding: 1.2rem 1rem 1rem; }
+    .header-top { margin-bottom: 0.9rem; }
+    .site-title { font-size: 1.2rem; }
+    .header-controls { gap: 0.6rem; }
+    .search-wrap { max-width: 100%; order: 3; width: 100%; }
+    .tabs { gap: 0.25rem; }
+    .tab-btn { padding: 0.35rem 0.65rem; font-size: 0.73rem; }
+    main { padding: 1.2rem 1rem; }
+    .card-headline-en { font-size: 0.95rem; }
+    .link-hub-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span class="site-title">기록자의 아카이브</span>
+    <span class="site-subtitle">News Archive</span>
+  </div>
+  <div class="header-controls">
+    <div class="date-group">
+      <span class="date-label">DATE</span>
+      <input type="date" id="datePicker">
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="searchInput" placeholder="키워드 검색...">
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="global">글로벌</button>
+      <button class="tab-btn" data-tab="domestic">국내</button>
+      <button class="tab-btn" data-tab="links">링크 허브</button>
+      <button class="tab-btn" data-tab="search">검색</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 글로벌 탭 -->
+  <div class="view active" id="view-global">
+    <div class="date-heading">
+      <span class="date-heading-text" id="global-date-label">—</span>
+      <div class="date-heading-line"></div>
+      <span class="count-badge" id="global-count">0건</span>
+    </div>
+    <div class="news-cards" id="global-cards"></div>
+  </div>
+
+  <!-- 국내 탭 -->
+  <div class="view" id="view-domestic">
+    <div class="date-heading">
+      <span class="date-heading-text" id="domestic-date-label">—</span>
+      <div class="date-heading-line"></div>
+      <span class="count-badge" id="domestic-count">0건</span>
+    </div>
+    <div class="news-cards" id="domestic-cards"></div>
+  </div>
+
+  <!-- 링크 허브 탭 -->
+  <div class="view" id="view-links">
+    <p class="hub-section-title">지상파 · 종편</p>
+    <div class="link-hub-grid">
+      <a class="link-card" href="https://imnews.imbc.com/replay/2026/nwdesk/6825134_36999.html" target="_blank">
+        <div class="link-icon" style="background:#003d99;color:#fff;">MBC</div>
+        <div class="link-info">
+          <div class="link-name">MBC 뉴스데스크</div>
+          <div class="link-desc">imnews.imbc.com</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+      <a class="link-card" href="https://news.kbs.co.kr/news/pc/program/program.do?bcd=0001&ref=pGnb" target="_blank">
+        <div class="link-icon" style="background:#003087;color:#fff;">KBS</div>
+        <div class="link-info">
+          <div class="link-name">KBS 뉴스 9</div>
+          <div class="link-desc">news.kbs.co.kr</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+      <a class="link-card" href="https://news.sbs.co.kr/news/programMain.do?prog_cd=R1&plink=GNB&cooper=SBSNEWS" target="_blank">
+        <div class="link-icon" style="background:#0033a0;color:#fff;">SBS</div>
+        <div class="link-info">
+          <div class="link-name">SBS 8뉴스</div>
+          <div class="link-desc">news.sbs.co.kr</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+      <a class="link-card" href="https://news.jtbc.co.kr/program/NG10000002" target="_blank">
+        <div class="link-icon" style="background:#e8001d;color:#fff;">JTBC</div>
+        <div class="link-info">
+          <div class="link-name">JTBC 뉴스룸</div>
+          <div class="link-desc">news.jtbc.co.kr</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+    </div>
+
+    <p class="hub-section-title">네이버 미디어 랭킹</p>
+    <div class="link-hub-grid">
+      <a class="link-card" href="https://media.naver.com/press/214/ranking" target="_blank">
+        <div class="link-icon" style="background:#1aba3e;color:#fff;">MBC</div>
+        <div class="link-info">
+          <div class="link-name">MBC 랭킹</div>
+          <div class="link-desc">media.naver.com</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+      <a class="link-card" href="https://media.naver.com/press/001/ranking?type=popular" target="_blank">
+        <div class="link-icon" style="background:#003087;color:#fff;">연합</div>
+        <div class="link-info">
+          <div class="link-name">연합뉴스 랭킹</div>
+          <div class="link-desc">media.naver.com</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+      <a class="link-card" href="https://media.naver.com/press/032/ranking" target="_blank">
+        <div class="link-icon" style="background:#2a4d8f;color:#fff;">경향</div>
+        <div class="link-info">
+          <div class="link-name">경향신문 랭킹</div>
+          <div class="link-desc">media.naver.com</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+      <a class="link-card" href="https://media.naver.com/press/028/ranking" target="_blank">
+        <div class="link-icon" style="background:#005bac;color:#fff;">한겨레</div>
+        <div class="link-info">
+          <div class="link-name">한겨레 랭킹</div>
+          <div class="link-desc">media.naver.com</div>
+        </div>
+        <span class="link-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 검색 탭 -->
+  <div class="view" id="view-search">
+    <div class="search-status" id="search-status">검색어를 입력하세요</div>
+    <div id="search-results"></div>
+  </div>
+</main>
+
+<script>
+const DATA_FILES = ['2026-03-22'];
+
+let allData = [];
+let currentTab = 'global';
+let currentDate = '';
+
+async function loadAllData() {
+  const promises = DATA_FILES.map(async (d) => {
+    try {
+      const res = await fetch(`data/${d}.json`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch { return null; }
+  });
+  const results = await Promise.all(promises);
+  allData = results.filter(Boolean);
+}
+
+function formatDateKo(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
+}
+
+function renderSources(sources) {
+  return sources.map(s => `<span class="source-chip">${s}</span>`).join('');
+}
+
+function renderGlobalCard(item) {
+  return `
+    <div class="news-card">
+      <div class="card-header">
+        <div class="card-meta">
+          <span class="card-num">${String(item.id).padStart(2,'0')}</span>
+          ${item.tag ? `<span class="card-tag global">${item.tag}</span>` : ''}
+          <div class="source-chips">${renderSources(item.sources)}</div>
+        </div>
+        <div class="card-headline-en">${item.headline_en}</div>
+        <div class="card-headline-ko">${item.headline_ko}</div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <span class="field-label">핵심 팩트</span>
+          <span class="field-value fact">${item.fact}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">설명</span>
+          <span class="field-value">${item.description}</span>
+        </div>
+        ${item.extra ? `<div class="field"><span class="field-label">추가 팩트</span><span class="field-value extra">${item.extra}</span></div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderDomesticCard(item) {
+  return `
+    <div class="news-card">
+      <div class="card-header">
+        <div class="card-meta">
+          <span class="card-num">${String(item.id).padStart(2,'0')}</span>
+          <span class="card-tag domestic">국내</span>
+          <div class="source-chips">${renderSources(item.sources)}</div>
+        </div>
+        <div class="card-headline-ko main">${item.headline_ko}</div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <span class="field-label">핵심 팩트</span>
+          <span class="field-value fact">${item.fact}</span>
+        </div>
+        <div class="field">
+          <span class="field-label">설명</span>
+          <span class="field-value">${item.description}</span>
+        </div>
+        ${item.extra ? `<div class="field"><span class="field-label">추가 해석</span><span class="field-value extra">${item.extra}</span></div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderByDate(date) {
+  currentDate = date;
+  const entry = allData.find(d => d.date === date);
+
+  const globalLabel = document.getElementById('global-date-label');
+  const domesticLabel = document.getElementById('domestic-date-label');
+  const globalCount = document.getElementById('global-count');
+  const domesticCount = document.getElementById('domestic-count');
+  const globalCards = document.getElementById('global-cards');
+  const domesticCards = document.getElementById('domestic-cards');
+
+  if (!entry) {
+    const dateKo = date ? formatDateKo(date) : '—';
+    globalLabel.textContent = dateKo;
+    domesticLabel.textContent = dateKo;
+    globalCount.textContent = '0건';
+    domesticCount.textContent = '0건';
+    globalCards.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">${dateKo} 기록 없음</div><div class="empty-state-desc">해당 날짜의 아카이브 파일이 없습니다.</div></div>`;
+    domesticCards.innerHTML = globalCards.innerHTML;
+    return;
+  }
+
+  const dateKo = formatDateKo(entry.date);
+  globalLabel.textContent = dateKo;
+  domesticLabel.textContent = dateKo;
+  globalCount.textContent = `${(entry.global||[]).length}건`;
+  domesticCount.textContent = `${(entry.domestic||[]).length}건`;
+  globalCards.innerHTML = (entry.global||[]).map(renderGlobalCard).join('');
+  domesticCards.innerHTML = (entry.domestic||[]).map(renderDomesticCard).join('');
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function highlightText(text, query) {
+  if (!query) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return escaped.replace(re, '<mark class="highlight">$1</mark>');
+}
+
+function searchAll(query) {
+  if (!query || query.length < 1) {
+    document.getElementById('search-status').textContent = '검색어를 입력하세요';
+    document.getElementById('search-results').innerHTML = '';
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const results = [];
+
+  allData.forEach(entry => {
+    const hits = [];
+    [...(entry.global||[]), ...(entry.domestic||[])].forEach(item => {
+      const text = [item.headline_en||'', item.headline_ko||'', item.tag||'', item.fact||'', item.description||'', item.extra||'', ...(item.sources||[])].join(' ').toLowerCase();
+      if (text.includes(q)) hits.push(item);
+    });
+    if (hits.length > 0) results.push({ date: entry.date, hits });
+  });
+
+  const statusEl = document.getElementById('search-status');
+  const resultsEl = document.getElementById('search-results');
+  const total = results.reduce((s, r) => s + r.hits.length, 0);
+
+  if (total === 0) {
+    statusEl.textContent = `"${query}" — 검색 결과 없음`;
+    resultsEl.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-title">결과 없음</div><div class="empty-state-desc">다른 키워드로 시도해보세요.</div></div>`;
+    return;
+  }
+
+  statusEl.textContent = `"${query}" — ${results.length}개 날짜 / 총 ${total}건`;
+
+  resultsEl.innerHTML = results.map(r => `
+    <div class="search-result-group">
+      <div class="search-result-date">${formatDateKo(r.date)} · ${r.hits.length}건</div>
+      <div class="news-cards">
+        ${r.hits.map(item => {
+          const isGlobal = item.category === 'global';
+          const h = (t) => highlightText(t||'', query);
+          return `
+            <div class="news-card">
+              <div class="card-header">
+                <div class="card-meta">
+                  <span class="card-num">${String(item.id).padStart(2,'0')}</span>
+                  ${item.tag ? `<span class="card-tag ${item.category}">${item.tag}</span>` : `<span class="card-tag ${item.category}">${isGlobal?'글로벌':'국내'}</span>`}
+                  <div class="source-chips">${renderSources(item.sources)}</div>
+                </div>
+                ${isGlobal ? `<div class="card-headline-en">${h(item.headline_en)}</div>` : ''}
+                <div class="card-headline-ko ${isGlobal?'':'main'}">${h(item.headline_ko)}</div>
+              </div>
+              <div class="card-body">
+                <div class="field"><span class="field-label">핵심 팩트</span><span class="field-value fact">${h(item.fact)}</span></div>
+                <div class="field"><span class="field-label">설명</span><span class="field-value">${h(item.description)}</span></div>
+                ${item.extra ? `<div class="field"><span class="field-label">추가 팩트</span><span class="field-value extra">${h(item.extra)}</span></div>` : ''}
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}, 200);
+
+// 탭 전환
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`view-${tab}`).classList.add('active');
+    currentTab = tab;
+    if (tab === 'search') {
+      document.getElementById('searchInput').focus();
+    }
+  });
+});
+
+// 날짜 선택
+document.getElementById('datePicker').addEventListener('change', (e) => {
+  renderByDate(e.target.value);
+});
+
+// 검색 (탭 자동 전환 포함)
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const q = e.target.value.trim();
+  clearTimeout(searchTimer);
+  if (q.length > 0) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelector('[data-tab="search"]').classList.add('active');
+    document.getElementById('view-search').classList.add('active');
+    currentTab = 'search';
+    searchTimer = setTimeout(() => searchAll(q), 250);
+  }
+});
+
+// 초기화
+async function init() {
+  await loadAllData();
+  const today = new Date().toISOString().slice(0,10);
+  const picker = document.getElementById('datePicker');
+  picker.value = today;
+
+  // 데이터 있는 가장 최근 날짜로 초기화
+  const latestDate = allData.length > 0
+    ? allData.sort((a,b) => b.date.localeCompare(a.date))[0].date
+    : today;
+  picker.value = latestDate;
+  renderByDate(latestDate);
+}
+
+init();
+</script>
+</body>
+</html>
