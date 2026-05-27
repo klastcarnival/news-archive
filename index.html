@@ -148,16 +148,21 @@
     margin-left: auto;
     height: 100%;
     align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+
+  .tabs::-webkit-scrollbar { display: none; }
 
   .tab-btn {
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
     color: var(--text-muted);
-    padding: 0 0.9rem;
+    padding: 0 0.7rem;
     height: 44px;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     cursor: pointer;
     font-family: 'Noto Sans KR', sans-serif;
     font-weight: 400;
@@ -165,6 +170,7 @@
     letter-spacing: 0.02em;
     white-space: nowrap;
     margin-bottom: -1px;
+    flex-shrink: 0;
   }
 
   .tab-btn:hover { color: var(--text-primary); }
@@ -770,7 +776,7 @@
 </main>
 
 <script>
-const DATA_FILES = ['2026-03-22'];
+const DATA_FILES = ['2026-03-22', '2026-03-21'];
 
 let allData = [];
 let currentTab = 'global';
