@@ -149,8 +149,10 @@
     height: 100%;
     align-items: center;
     overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    touch-action: pan-x;
   }
 
   .tabs::-webkit-scrollbar { display: none; }
@@ -532,23 +534,11 @@
     color: var(--text-primary);
     font-weight: 500;
     cursor: pointer;
-    background: var(--bg);
+    background: #d6f0e0;
     transition: background 0.15s;
   }
 
-  .cal-day.has-record:hover { background: var(--border); }
-
-  .cal-day.has-record::after {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--domestic-accent);
-  }
+  .cal-day.has-record:hover { background: #bde6ce; }
 
   .cal-day.today {
     border: 1px solid var(--border-strong);
@@ -776,7 +766,7 @@
 </main>
 
 <script>
-const DATA_FILES = ['2026-03-22', '2026-03-21'];
+const DATA_FILES = ['2026-03-22'];
 
 let allData = [];
 let currentTab = 'global';
