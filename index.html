@@ -3,28 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>뉴스 아카이브</title>
+<title>기록자의 아카이브</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f5f0;
+    --bg: #f5f5f3;
     --bg-card: #ffffff;
     --bg-tag: #1a1a1a;
     --text-primary: #1a1a1a;
     --text-secondary: #5a5a5a;
-    --text-muted: #9a9a9a;
-    --accent: #c8392b;
-    --accent-light: #fdf0ee;
-    --border: #e0ddd5;
-    --border-strong: #c8c4bb;
+    --text-muted: #aaaaaa;
+    --border: #e8e8e4;
+    --border-strong: #d0d0ca;
+    --header-bg: #ffffff;
     --global-accent: #1a3a5c;
-    --global-light: #eef3f8;
     --domestic-accent: #2d5a3d;
-    --domestic-light: #eef5f1;
-    --tab-active-bg: #1a1a1a;
-    --tab-active-text: #ffffff;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,11 +31,11 @@
     min-height: 100vh;
   }
 
-  /* 헤더 */
+  /* 헤더 — 라이트 뉴스룸 */
   header {
-    background: var(--text-primary);
-    color: #fff;
-    padding: 1.5rem 2rem 1.2rem;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -48,23 +43,30 @@
 
   .header-top {
     display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
+    align-items: center;
+    gap: 1.2rem;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
   }
 
   .site-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--text-primary);
+  }
+
+  .site-divider {
+    width: 1px;
+    height: 14px;
+    background: var(--border-strong);
   }
 
   .site-subtitle {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.08em;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     font-family: 'IBM Plex Mono', monospace;
   }
@@ -73,96 +75,104 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    flex-wrap: wrap;
+    height: 44px;
   }
 
   /* 날짜 선택 */
   .date-group {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
 
   .date-label {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.5);
+    font-size: 0.65rem;
+    color: var(--text-muted);
     font-family: 'IBM Plex Mono', monospace;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   input[type="date"] {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    padding: 0.4rem 0.7rem;
-    font-size: 0.82rem;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
     border-radius: 4px;
     font-family: 'IBM Plex Mono', monospace;
     cursor: pointer;
     outline: none;
+    transition: border-color 0.15s;
   }
 
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) opacity(0.6);
-  }
+  input[type="date"]:focus { border-color: var(--text-primary); }
 
   /* 검색창 */
   .search-wrap {
     position: relative;
     flex: 1;
-    max-width: 280px;
+    max-width: 240px;
   }
 
   .search-icon {
     position: absolute;
-    left: 0.7rem;
+    left: 0.65rem;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
+    font-size: 0.75rem;
+    color: var(--text-muted);
     pointer-events: none;
   }
 
   input[type="search"] {
     width: 100%;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    padding: 0.4rem 0.7rem 0.4rem 2rem;
-    font-size: 0.82rem;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+    padding: 0.3rem 0.6rem 0.3rem 1.9rem;
+    font-size: 0.78rem;
     border-radius: 4px;
     font-family: 'Noto Sans KR', sans-serif;
     outline: none;
-    transition: background 0.2s;
+    transition: border-color 0.15s;
   }
 
-  input[type="search"]::placeholder { color: rgba(255,255,255,0.35); }
-  input[type="search"]:focus { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); }
+  input[type="search"]::placeholder { color: var(--text-muted); }
+  input[type="search"]:focus { border-color: var(--text-primary); background: #fff; }
 
   /* 탭 */
   .tabs {
     display: flex;
-    gap: 0.3rem;
+    gap: 0;
     margin-left: auto;
+    height: 100%;
+    align-items: center;
   }
 
   .tab-btn {
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.55);
-    padding: 0.38rem 0.9rem;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    padding: 0 0.9rem;
+    height: 44px;
     font-size: 0.78rem;
-    border-radius: 4px;
     cursor: pointer;
     font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 500;
+    font-weight: 400;
     transition: all 0.15s;
     letter-spacing: 0.02em;
     white-space: nowrap;
+    margin-bottom: -1px;
   }
 
-  .tab-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .tab-btn.active { background: #fff; color: var(--text-primary); border-color: #fff; }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--text-primary);
+    font-weight: 500;
+  }
 
   /* 메인 콘텐츠 */
   main {
@@ -318,12 +328,13 @@
   }
 
   .field-value.extra {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    background: var(--accent-light);
-    border-left: 2px solid var(--accent);
-    padding: 0.5rem 0.75rem;
-    border-radius: 0 4px 4px 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-weight: 300;
+    border-top: 1px dashed var(--border);
+    padding-top: 0.55rem;
+    margin-top: 0.1rem;
   }
 
   /* 검색 결과 */
@@ -357,8 +368,8 @@
   /* 링크 허브 */
   .link-hub-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.8rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
 
   .link-card {
@@ -431,17 +442,17 @@
 
   /* 모바일 */
   @media (max-width: 640px) {
-    header { padding: 1.2rem 1rem 1rem; }
-    .header-top { margin-bottom: 0.9rem; }
-    .site-title { font-size: 1.2rem; }
-    .header-controls { gap: 0.6rem; }
-    .search-wrap { max-width: 100%; order: 3; width: 100%; }
-    .tabs { gap: 0.25rem; }
-    .tab-btn { padding: 0.35rem 0.65rem; font-size: 0.73rem; }
+    header { padding: 0 1rem; }
+    .header-top { height: 46px; gap: 0.8rem; }
+    .site-title { font-size: 0.9rem; }
+    .header-controls { gap: 0.5rem; height: 40px; }
+    .search-wrap { display: none; }
+    .tab-btn { padding: 0 0.6rem; font-size: 0.72rem; height: 40px; }
     main { padding: 1.2rem 1rem; }
-    .card-headline-en { font-size: 0.95rem; }
-    .link-hub-grid { grid-template-columns: 1fr 1fr; }
+    .link-hub-grid { grid-template-columns: 1fr; }
   }
+
+  /* 모바일 기존 쿼리 제거 (위에 통합됨) */
 </style>
 </head>
 <body>
@@ -449,11 +460,12 @@
 <header>
   <div class="header-top">
     <span class="site-title">기록자의 아카이브</span>
+    <div class="site-divider"></div>
     <span class="site-subtitle">News Archive</span>
   </div>
   <div class="header-controls">
     <div class="date-group">
-      <span class="date-label">DATE</span>
+      <span class="date-label">Date</span>
       <input type="date" id="datePicker">
     </div>
     <div class="search-wrap">
@@ -632,7 +644,7 @@ function renderDomesticCard(item) {
       <div class="card-header">
         <div class="card-meta">
           <span class="card-num">${String(item.id).padStart(2,'0')}</span>
-          <span class="card-tag domestic">국내</span>
+          ${item.tag ? `<span class="card-tag domestic">${item.tag}</span>` : ''}
           <div class="source-chips">${renderSources(item.sources)}</div>
         </div>
         <div class="card-headline-ko main">${item.headline_ko}</div>
